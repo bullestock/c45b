@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with c45b.  If not, see <http://www.gnu.org/licenses/>.
 
-INCLUDEPATH += ../qextserialport/src
-LIBS += -lqextserialport -lkdecore -L ../qextserialport/src/build
+INCLUDEPATH += ../qserialdevice/src/qserialdevice ../common
+LIBS += -lqserialdevice -lkdecore -L ../qserialdevice/src/build/release
 
 HEADERS       = 
-SOURCES       = main.cpp
+SOURCES       = main.cpp ../common/serport.cpp

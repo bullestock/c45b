@@ -5,9 +5,9 @@
 
 using namespace std;
 
-C45BSerialPort::C45BSerialPort(QString device, QextSerialPort::QueryMode mode)
-    : QextSerialPort(device, mode)
+C45BSerialPort::C45BSerialPort(QString device)
 {
+    setDeviceName(device);
 }
 
 C45BSerialPort::~C45BSerialPort()
@@ -16,15 +16,15 @@ C45BSerialPort::~C45BSerialPort()
 
 bool C45BSerialPort::init()
 {
-//    setBaudRate(BAUD19200);
-        setBaudRate(BAUD9600);
-	setFlowControl(FLOW_XONXOFF);
-	setParity(PAR_NONE);
-	setDataBits(DATA_8);
-	setStopBits(STOP_2);
-	setTimeout(1000);
-//	setTimeout(-1);
-    return open(QIODevice::ReadWrite);
+    bool ok = open(QIODevice::ReadWrite) &&
+        setBaudRate(BaudRate19200) &&
+        setFlowControl(FlowControlXonXoff) &&
+        setParity(ParityNone) &&
+        setDataBits(DataBits8) &&
+        setStopBits(StopBits2);
+    setTotalReadConstantTimeout(1000);
+	//setTimeout(-1);
+    return ok;    
 }
 
 QByteArray C45BSerialPort::readUntil(char terminator, qint64 maxSize)

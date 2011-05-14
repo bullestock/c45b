@@ -18,21 +18,25 @@
 #include <iostream>
 #include <iomanip>
 
+#include <errno.h>
+
 #include <QApplication>
+#include <QDebug>
 #include <QTextStream>
 #include <QThread>
 #include <QTime>
 
-#include <qextserialport.h>
-
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
 
+#include "serport.h"
 
 using namespace std;
 
 
 static void SilentMsgHandler(QtMsgType, const char *);
+
+bool waitFor(C45BSerialPort* port, char c, QString s);
 
 
 static const char* version = "0.1";
@@ -43,16 +47,16 @@ int main(int argc, char *argv[])
     const int InitialTimeOut = 60000;
 
     // Suppress qDebug output from QextSerialPort
-    qInstallMsgHandler(SilentMsgHandler);
+//    qInstallMsgHandler(SilentMsgHandler);
         
     QCoreApplication app(argc, argv);
 
     QTextStream cout(stdout, QIODevice::WriteOnly);
 
-    KAboutData about("c45b", 0, ki18n("c45b"), version,
+    KAboutData about("c45b", "", ki18n("c45b"), version, 
                      ki18n("Tool for communicating with the Chip45 bootloader"),
                      KAboutData::License_GPL_V3,
-                     ki18n("Copyright 2010 Torsten Martinsen"),
+                     ki18n("Copyright 2011 Torsten Martinsen"),
                      ki18n(""),
                      "http://bullestock.net",
                      "torsten@bullestock.net");
@@ -64,6 +68,7 @@ int main(int argc, char *argv[])
     options.add("f", ki18n("Program flash memory"));
     options.add("e", ki18n("Program EEPROM"));
     options.add("d", ki18n("Show debug info"));
+    options.add("verbose", ki18n("Verbose"));
     options.add("help", ki18n("Help"));
     
     KCmdLineArgs::addCmdLineOptions(options);
@@ -76,84 +81,104 @@ int main(int argc, char *argv[])
     }
     
     bool debug = args->isSet("d");
+    bool verbose = debug || args->isSet("verbose");
 
     QString device = args->getOption("p");
 
-    QextSerialPort* port = new QextSerialPort(device, QextSerialPort::Polling);
-	port->setBaudRate(BAUD19200);
-	port->setFlowControl(FLOW_XONXOFF);
-	port->setParity(PAR_NONE);
-	port->setDataBits(DATA_8);
-	port->setStopBits(STOP_2);
-	port->setTimeout(500);
-
-    if (!port->open(QIODevice::ReadWrite))
+    C45BSerialPort* port = new C45BSerialPort(device);
+    if (!port->init())
     {
         cout << "Error: Cannot open port '" << device << "': " << strerror(errno) << endl;
         return 1;
     }
 
+    if (verbose)
+        cout << "Connecting..." << flush;
+
     QTime t;
     t.start();
-    bool gotPrompt = false;
-    while (!gotPrompt && (t.elapsed() < InitialTimeOut))
+    while (!port->bytesAvailable() && (t.elapsed() < InitialTimeOut))
     {
         // "After a reset the bootloader waits for approximately 2 seconds to detect a
         //  transmission at its RXD pin. If so, it will measure the timing of the rising
         //  and falling edges of four consecutive characters 'U' at the host's baud to
         //  determine its correct baud rate prescaler."
 
-        int written = port->write("UUUU", 4);
-
-        if (debug)
-            cout << "Written: " << written << endl;
-
-        QString msg = port->read(100);
-
-        if (debug)
-            cout << "Read: " << msg << endl;
-
-        int promptPos = msg.indexOf("c45b2");
-        if (promptPos >= 0)
-        {
-            gotPrompt = true;
-            QString blVersion = msg.mid(promptPos+6);
-            int nlPos = blVersion.indexOf("\n");
-            if (nlPos > 0)
-                blVersion = blVersion.left(nlPos);
-            cout << "Bootloader version " << blVersion << endl;
-        }
+        port->putChar('U');
+        port->putChar('U');
+        port->putChar('U');
+        port->putChar('U');
+        port->flush();
 
         usleep(100000);
+        if (verbose && (t.elapsed() > 500))
+        {
+            cout << "." << flush;
+            t.start();
+        }
     }
+    QString prompt = port->readUntil('>', 20);
 
-    if (!gotPrompt)
+    if (debug)
+        cout << "Read: " << prompt << endl;
+    if (verbose)
+        cout << "\rConnected                                                                      " << endl;
+    
+    if (prompt.isEmpty())
     {
         cout << "Error: No initial reply from bootloader" << endl;
         return 1;
     }
+    if (!prompt.startsWith("c45b2"))
+    {
+        cout << "Error: Wrong bootloader version: " << prompt << endl;
+        return 1;
+    }
+    if (verbose)
+        cout << "Bootloader " << prompt.mid(5).simplified() << endl;
+
+    for (int i = 0; i < 2; ++i)
+    {
+        usleep(1000000);
+        port->putChar('\n');
+        usleep(1000000);
+        QByteArray r = port->readAll();
+        cout << "NL reply: " << r.toHex() << "/" << QString(r) << endl;
+    }
+    // Flush
+    port->readAll();
+    usleep(1000000);
 
     if (args->isSet("f"))
     {
-        cout << "Programming flash memory.." << flush;
-        port->write("pf\n", 3);
-        QTime t;
-        t.start();
-        bool gotReply = false;
-        while (!gotReply && (t.elapsed() < 100))
-        {
-            QString reply = port->read(10);
-            if (reply.contains("pf+"))
-            {
-                gotReply = true;
-                cout << "." << flush;
-            }
-        }
-        if (!gotReply)
+        port->putChar('\n');
+        usleep(1000000);
+        QByteArray r = port->readAll();
+        cout << "NL reply: " << r.toHex() << "/" << QString(r) << endl;
+        cout << "Send pf" << endl;
+        port->write("pf\n", 311);
+        // Wait for XOFF
+        if (!waitFor(port, 19, "XOFF"))
+//            return 1;
+            ;
+        // Wait for "pf+\r"
+        QString reply = port->readUntil('\r', 10);
+        reply = reply.remove(QChar(17)).remove(QChar(19)).trimmed();
+        if (!reply.startsWith("pf+"))
         {
             cout << "Error: Bootloader did not respond to 'pf' command" << endl;
+            if (verbose)
+                cout << "Reply: " << reply << endl;
             return 1;
         }
+        // Wait for XON
+        waitFor(port, 17, "XON");
+        // Load hex file into memory
+
+
+        // Send to bootloader
+        cout << "Programming flash memory.." << flush;
+        
         for (int i = 0; i < 10; ++i)
         {
             cout << "." << flush;
@@ -168,4 +193,20 @@ int main(int argc, char *argv[])
 
 static void SilentMsgHandler(QtMsgType, const char *)
 {
+}
+
+bool waitFor(C45BSerialPort* port, char c, QString s)
+{
+    char got = 0;
+    if (!port->getChar(&got))
+    {
+        cout << "Error: Timeout waiting for " << qPrintable(s) << endl;
+        return false;
+    }
+    if (got != c)
+    {
+        cout << "Error: Expected " << qPrintable(s) << ", got " << static_cast<int>(got) << endl;
+        return false;
+    }
+    return true;
 }

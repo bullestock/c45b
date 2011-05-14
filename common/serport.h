@@ -1,9 +1,9 @@
-#include <qextserialport.h>
+#include <abstractserial.h>
 
-class C45BSerialPort : public QextSerialPort
+class C45BSerialPort : public AbstractSerial
 {
 public:
-    C45BSerialPort(QString device, QextSerialPort::QueryMode mode);
+    C45BSerialPort(QString device);
 
     ~C45BSerialPort();
 
