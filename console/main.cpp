@@ -46,9 +46,9 @@ int main(int argc, char *argv[])
 {
     const int InitialTimeOut = 60000;
 
-    // Suppress qDebug output from QextSerialPort
-//    qInstallMsgHandler(SilentMsgHandler);
-        
+    // Suppress qDebug output from QSerialPort
+    qInstallMsgHandler(SilentMsgHandler);
+    
     QCoreApplication app(argc, argv);
 
     QTextStream cout(stdout, QIODevice::WriteOnly);
@@ -108,10 +108,10 @@ int main(int argc, char *argv[])
         port->putChar('U');
         port->putChar('U');
         port->putChar('U');
-        port->flush();
+        port->flushOutBuffer();
 
         usleep(100000);
-        if (verbose && (t.elapsed() > 500))
+        if (verbose && (t.elapsed() > 1000))
         {
             cout << "." << flush;
             t.start();
@@ -137,30 +137,16 @@ int main(int argc, char *argv[])
     if (verbose)
         cout << "Bootloader " << prompt.mid(5).simplified() << endl;
 
-    for (int i = 0; i < 2; ++i)
-    {
-        usleep(1000000);
-        port->putChar('\n');
-        usleep(1000000);
-        QByteArray r = port->readAll();
-        cout << "NL reply: " << r.toHex() << "/" << QString(r) << endl;
-    }
     // Flush
     port->readAll();
-    usleep(1000000);
+    usleep(100000);
 
     if (args->isSet("f"))
     {
         port->putChar('\n');
-        usleep(1000000);
+        usleep(100000);
         QByteArray r = port->readAll();
-        cout << "NL reply: " << r.toHex() << "/" << QString(r) << endl;
-        cout << "Send pf" << endl;
         port->write("pf\n", 311);
-        // Wait for XOFF
-        if (!waitFor(port, 19, "XOFF"))
-//            return 1;
-            ;
         // Wait for "pf+\r"
         QString reply = port->readUntil('\r', 10);
         reply = reply.remove(QChar(17)).remove(QChar(19)).trimmed();
@@ -171,10 +157,7 @@ int main(int argc, char *argv[])
                 cout << "Reply: " << reply << endl;
             return 1;
         }
-        // Wait for XON
-        waitFor(port, 17, "XON");
         // Load hex file into memory
-
 
         // Send to bootloader
         cout << "Programming flash memory.." << flush;
@@ -189,7 +172,6 @@ int main(int argc, char *argv[])
 
     port->close();
 }
-
 
 static void SilentMsgHandler(QtMsgType, const char *)
 {

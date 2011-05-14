@@ -1,6 +1,6 @@
-#include <abstractserial.h>
+#include <QtSerialPort/qserialport.h>
 
-class C45BSerialPort : public AbstractSerial
+class C45BSerialPort : public TNX::QSerialPort
 {
 public:
     C45BSerialPort(QString device);
