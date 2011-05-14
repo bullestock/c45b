@@ -29,6 +29,7 @@
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
 
+#include "hexfile.h"
 #include "serport.h"
 
 using namespace std;
@@ -70,7 +71,8 @@ int main(int argc, char *argv[])
     options.add("d", ki18n("Show debug info"));
     options.add("verbose", ki18n("Verbose"));
     options.add("help", ki18n("Help"));
-    
+    options.add("+file", ki18n("Name of the hex file"));
+
     KCmdLineArgs::addCmdLineOptions(options);
 
     KCmdLineArgs* args = KCmdLineArgs::parsedArgs();
@@ -79,10 +81,23 @@ int main(int argc, char *argv[])
         cout << "Neither -f nor -e specified - nothing to do" << endl;
         return 1;
     }
-    
+    if (args->count() < 1)
+    {
+        cout << "No filename specified" << endl;
+        return 1;
+    }
+
     bool debug = args->isSet("d");
     bool verbose = debug || args->isSet("verbose");
 
+    QString fileName(args->arg(0));
+    HexFile hexFile(fileName, verbose);
+    if (hexFile.load())
+    {
+        cout << "Failed to load file '" << fileName << "': " << hexFile.errorString() << endl;
+        return 1;
+    }
+    
     QString device = args->getOption("p");
 
     C45BSerialPort* port = new C45BSerialPort(device);

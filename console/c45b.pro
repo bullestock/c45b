@@ -19,4 +19,6 @@ INCLUDEPATH += ../qserialport/include ../common
 LIBS += -lQtSerialPort -lkdecore -L ../qserialport/lib
 
 HEADERS       = 
-SOURCES       = main.cpp ../common/serport.cpp
+SOURCES       = main.cpp \
+    ../common/serport.cpp \
+    ../common/hexfile.cpp
