@@ -1,0 +1,24 @@
+c45b is a frontend to the AVR bootloader from Chip45 GmBH
+(see http://www.chip45.com/info/chip45boot2.html for details).
+
+Currently, only a command-line version is provided.
+
+To build, you will need g++ and Qt4.
+
+Installation:
+
+        git clone git://github.com/bullestock/c45b.git
+        cd c45b
+        qmake
+        make
+
+On Debian-based systems (including Ubuntu), I recommend
+installing using
+
+           sudo checkinstall
+
+Otherwise, simply do
+
+           sudo install
+
+For help, run c45b --help.

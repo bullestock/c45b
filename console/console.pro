@@ -16,7 +16,7 @@
 # along with c45b.  If not, see <http://www.gnu.org/licenses/>.
 
 INCLUDEPATH += ../qserialport/include ../common
-LIBS += -lQtSerialPort -lkdecore -L ../qserialport/lib
+LIBS += -lkdecore -L ../qserialport/lib -lQtSerialPort
 
 TARGET = c45b
 
