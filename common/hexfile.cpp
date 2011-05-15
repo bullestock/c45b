@@ -16,6 +16,7 @@ HexFile::HexFile(QString fileName, bool verbose)
     : m_fileName(fileName),
       m_verbose(verbose)
 {
+    reset();
 }
 
 HexFile::~HexFile()
@@ -33,7 +34,7 @@ bool HexFile::load()
 
     m_buffer.resize(MAX_FLASH_BYTES/16*46);
 
-	quint32 endAddress = 0x00000000;
+	m_endAddress = 0x00000000;
 
     while (!f.atEnd())
     {
@@ -52,22 +53,23 @@ bool HexFile::load()
 
         quint16 extendedSegmentAddress = 0;
         
-		if (recordType == 2)
+		switch (recordType)
         {
+        case 2:
             // extended segment address record
 			extendedSegmentAddress = asciiToHex(line[9], line[10]) << 8;
 			checkSum += (extendedSegmentAddress >> 8);  // chechsum...
 			extendedSegmentAddress += asciiToHex(line[11], line[12]);
 			checkSum += (extendedSegmentAddress & 0xff);  // chechsum...
-		}
-        else if(recordType == 1)
-        {
+            break;
+
+        case 1:
             // end of file record
             if (m_verbose)
-                cout << "EOF" << endl;
+                cout << "Loaded hex file" << endl;
 			break;
-		}
-        else if(recordType == 0)
+
+        case 0:
         {
             // data record
             unsigned int i = 0;
@@ -79,17 +81,19 @@ bool HexFile::load()
 			}
 			
 			// in case the hex file is unordered
-			if (endAddress < address + (extendedSegmentAddress * 16U) + (i >> 1))
+			if (m_endAddress < address + (extendedSegmentAddress * 16U) + (i >> 1))
             {
-				endAddress = address + (extendedSegmentAddress * 16U) + (i >> 1);
+				m_endAddress = address + (extendedSegmentAddress * 16U) + (i >> 1);
 			}
 			
-			if (endAddress > (MAX_FLASH_BYTES/16*46))
+			if (m_endAddress > (MAX_FLASH_BYTES/16*46))
             {
-                m_lastError = QString("Overflow (address %1)").arg(endAddress);
+                m_lastError = QString("Overflow (address %1)").arg(m_endAddress);
 				return false;
 			}
 		}
+        break;
+        }
 
 		// check if checksum error
 		if (((checkSum + fileCheckSum) & 0xff) != 0)
@@ -106,89 +110,57 @@ QString HexFile::errorString() const
     return m_lastError;
 }
 
+int HexFile::currentLine() const
+{
+    return m_currentLine;
+}
 
-// 	SetCtrlAttribute(tabMainPanelHandle, TABMAIN_LEDCONNECTBOOTLOADER, ATTR_LABEL_TEXT, "Uploading"); 
+void HexFile::reset()
+{
+	m_extendedSegmentAddress = 0x00000000;
+    m_currentLine = 0;
+}
+
+bool HexFile::getLine(QString& s)
+{
+	const int byteCount = 0x10;  // byte count is fixed to 16 bytes
 	
-// 	// status message in communication log
-// 	Fmt(tmpBuffer, "Uploading hex file to bootloader:\r\n");
-// 	SetCtrlVal (panelLogHandle, LOGPANEL_COMMUNICATIONLOG, tmpBuffer);
+	// outer loop for each 16 byte hex file lines
+	if (m_currentLine > ((m_endAddress-1) / 16))
+        return false;
 
+    quint32 bufferAddress = m_currentLine * 16;
+
+    const QChar fill = '0';
+    s = QString(":%1%2%3").arg(byteCount, 2, 16, fill).arg(bufferAddress & 0XFFFF, 4, 16, fill).arg(0, 2, 16, fill);
+
+    // checksum
+    unsigned char fileCheckSum = byteCount;
+    fileCheckSum += (bufferAddress >> 8);
+    fileCheckSum += (bufferAddress & 0xff);
+
+    s += QString(m_buffer.mid(bufferAddress, 16).toHex()).toUpper();
+    for (int i = 0; i < 16; ++i)
+    {
+        unsigned char c = m_buffer[bufferAddress + i];
+        fileCheckSum += c;
+    }
+
+    s += QString("%1\n").arg(static_cast<unsigned char>(256 - fileCheckSum), 2, 16, fill);
+		
+    // check if we would exceed the 64k page address range with the next hex file line
+    if (((bufferAddress & 0xffff) + 16) == 0x10000)
+    {
+        m_extendedSegmentAddress += 0x1000;  // the segment address is later multiplied by 16 and added to the hex record address
+        s += QString(":02000002%1%2\n").
+            arg(m_extendedSegmentAddress, 4, 16, fill).
+            arg(static_cast<unsigned char>(0x100 - (4 + (m_extendedSegmentAddress >> 8) + (m_extendedSegmentAddress & 0xFF))), 2, 16, fill);
+	}
 	
-// 	extendedSegmentAddress = 0x00000000;
-// 	byteCount = 0x10;  // byte count is fixed to 16 bytes
-// 	unsigned long m_bufferAddress = 0;  // we always start at bottom of flash
-// 	unsigned char flagErrorUploading = 0;
-	
-	
-// 	// outer loop for each 16 byte hex file lines
-// 	for(unsigned short lineCounter = 0; (lineCounter <= ((endAddress-1) / 16)) && (flagErrorUploading == 0); ++lineCounter) {
+    ++m_currentLine;
 
-// 		char i = 0;
-// 		unsigned short hexFileDataByteCounter = 0;
-// 		char *buffer = line;  // temporary buffer now points to hex line buffer
-		
-// 		m_bufferAddress = lineCounter * 16;
-		
-// 		// start printing normal data record
-// 		i = sprintf(buffer, ":%02X%04X%02X", byteCount, (unsigned short)(m_bufferAddress & 0xffff), 0x00);
-// 		buffer += i;
-
-// 		// checksum...
-// 		fileCheckSum = byteCount;
-// 		fileCheckSum += (m_bufferAddress >> 8);
-// 		fileCheckSum += (m_bufferAddress & 0xff);
-		
-// 		// inner loop for the 16 data bytes
-// 		for(hexFileDataByteCounter = 0; hexFileDataByteCounter < 16; ++hexFileDataByteCounter) {
-			
-// 			unsigned char c = m_buffer[m_bufferAddress + hexFileDataByteCounter];
-			
-// 			i = sprintf(buffer, "%02X", c);
-// 			buffer += i;
-// 			fileCheckSum += c;
-			
-// 		}
-		
-// 		// append the calculated checksum and line ending
-// 		sprintf(buffer, "%02X\n", (0x100 - fileCheckSum) & 0xff);
-
-// 		// now line contains all the stuff printed
-// 		ec = uploadHexLine(line);
-// 		if(ec < 0) {
-// 			flagErrorUploading = 1;
-// 			break;
-// 		};
-
-		
-		
-// 		// check if we would exceed the 64k page address range with the next hex file line and insert a 
-// 		if( ((m_bufferAddress & 0xffff) + 16) == 0x10000) {
-// 			extendedSegmentAddress += 0x1000;  // the segment address is later multiplied by 16 and added to the hex record address
-// 			sprintf(line, ":02000002%04X%02X\n", extendedSegmentAddress, (unsigned char)(0x100 - (4 + (extendedSegmentAddress >> 8) + (extendedSegmentAddress & 0xff))));
-
-// 			if(uploadHexLine(line) < 0) {
-// 				flagErrorUploading = 1;
-// 				break;
-// 			};
-		
-// #ifdef DEBUG
-// 			printf("%s", line);
-// #endif
-// 		}
-		
-// 		// set progress bar
-// 		ProgressBar_SetPercentage(tabMainPanelHandle, TABMAIN_PROGRESSBAR, lineCounter*100 / ((endAddress-1) / 16), "");
-// 	}
-	
-// 	// if no error occured, we may append the end record
-// 	if(flagErrorUploading == 0) {
-
-// 		sprintf(line, ":00000001FF\n");
-// 		if(uploadHexLine(line) < 0) {
-// 			flagErrorUploading = 1;
-// 		}
-// 	}
-
+    return true;
+}
 
     
 unsigned char HexFile::asciiToHex(unsigned char a)

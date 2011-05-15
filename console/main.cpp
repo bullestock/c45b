@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
     QString fileName(args->arg(0));
     HexFile hexFile(fileName, verbose);
-    if (hexFile.load())
+    if (!hexFile.load())
     {
         cout << "Failed to load file '" << fileName << "': " << hexFile.errorString() << endl;
         return 1;
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     
     QString device = args->getOption("p");
 
-    C45BSerialPort* port = new C45BSerialPort(device);
+    C45BSerialPort* port = new C45BSerialPort(device, verbose);
     if (!port->init())
     {
         cout << "Error: Cannot open port '" << device << "': " << strerror(errno) << endl;
@@ -161,10 +161,11 @@ int main(int argc, char *argv[])
         port->putChar('\n');
         usleep(100000);
         QByteArray r = port->readAll();
-        port->write("pf\n", 311);
+        port->write("pf\n", 3);
         // Wait for "pf+\r"
         QString reply = port->readUntil('\r', 10);
-        reply = reply.remove(QChar(17)).remove(QChar(19)).trimmed();
+//        reply = reply.remove(QChar(17)).remove(QChar(19)).trimmed();
+        reply = reply.trimmed();
         if (!reply.startsWith("pf+"))
         {
             cout << "Error: Bootloader did not respond to 'pf' command" << endl;
@@ -176,12 +177,21 @@ int main(int argc, char *argv[])
 
         // Send to bootloader
         cout << "Programming flash memory.." << flush;
-        
-        for (int i = 0; i < 10; ++i)
+
+        QString s;
+        while (hexFile.getLine(s))
+            if (!port->downloadLine(s))
+            {
+                cout << "Error: Failed to download line " << hexFile.currentLine() << endl;
+                return 1;
+            }
+
+        if (!port->downloadLine(":00000001FF\n"))
         {
-            cout << "." << flush;
-            usleep(200000);
+            cout << "Error: Failed to download line " << hexFile.currentLine() << endl;
+            return 1;
         }
+
         cout << "done" << endl;
     }
 
