@@ -15,10 +15,13 @@ Installation:
 On Debian-based systems (including Ubuntu), I recommend
 installing using
 
-           sudo checkinstall
+           sudo checkinstall --fstrans=no
 
 Otherwise, simply do
 
            sudo install
 
 For help, run c45b --help.
+
+Torsten Martinsen <torsten@bullestock.net>
+May 2011
