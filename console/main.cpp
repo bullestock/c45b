@@ -1,4 +1,4 @@
-// Copyright 2010 Torsten Martinsen <bullestock@bullestock.net>
+// Copyright 2011 Torsten Martinsen <bullestock@bullestock.net>
 
 // This file is part of c45b.
 
@@ -37,14 +37,13 @@ using namespace std;
 
 static void SilentMsgHandler(QtMsgType, const char *);
 
-bool waitFor(C45BSerialPort* port, char c, QString s);
-
 
 static const char* version = "0.1";
 
 
 int main(int argc, char *argv[])
 {
+    // How many ms to wait for bootloader prompt
     const int InitialTimeOut = 60000;
 
     // Suppress qDebug output from QSerialPort
@@ -76,7 +75,9 @@ int main(int argc, char *argv[])
     KCmdLineArgs::addCmdLineOptions(options);
 
     KCmdLineArgs* args = KCmdLineArgs::parsedArgs();
-    if (!args->isSet("f") && !args->isSet("e"))
+    const bool doFlash = args->isSet("f");
+    const bool doEeprom = args->isSet("e");
+    if (!doFlash && !doEeprom)
     {
         cout << "Neither -f nor -e specified - nothing to do" << endl;
         return 1;
@@ -156,64 +157,49 @@ int main(int argc, char *argv[])
     port->readAll();
     usleep(100000);
 
-    if (args->isSet("f"))
+    port->putChar('\n');
+    usleep(100000);
+    port->readAll();
+
+    QString cmd(doFlash ? "pf" : "pe");
+    port->write(cmd.toAscii().data(), cmd.size());
+    port->putChar('\n');
+    // Wait for "pf+\r"
+    QString reply = port->readUntil('\r', 10);
+    reply = reply.trimmed();
+    QString expected = cmd + QString("+");
+    if (!reply.startsWith(expected))
     {
-        port->putChar('\n');
-        usleep(100000);
-        QByteArray r = port->readAll();
-        port->write("pf\n", 3);
-        // Wait for "pf+\r"
-        QString reply = port->readUntil('\r', 10);
-//        reply = reply.remove(QChar(17)).remove(QChar(19)).trimmed();
-        reply = reply.trimmed();
-        if (!reply.startsWith("pf+"))
-        {
-            cout << "Error: Bootloader did not respond to 'pf' command" << endl;
-            if (verbose)
-                cout << "Reply: " << reply << endl;
-            return 1;
-        }
-        // Load hex file into memory
+        cout << "Error: Bootloader did not respond to '" << (doFlash ? "pf" : "pe") << "' command" << endl;
+        if (verbose)
+            cout << "Reply: " << reply << endl;
+        return 1;
+    }
 
-        // Send to bootloader
-        cout << "Programming flash memory.." << flush;
+    // Send to bootloader
+    if (verbose)
+        cout << "Programming " << (doFlash ? "flash" : "EEPROM") << " memory..." << flush;
 
-        QString s;
-        while (hexFile.getLine(s))
-            if (!port->downloadLine(s))
-            {
-                cout << "Error: Failed to download line " << hexFile.currentLine() << endl;
-                return 1;
-            }
-
-        if (!port->downloadLine(":00000001FF\n"))
+    QString s;
+    while (hexFile.getLine(s))
+        if (!port->downloadLine(s))
         {
             cout << "Error: Failed to download line " << hexFile.currentLine() << endl;
             return 1;
         }
 
-        cout << "done" << endl;
+    if (!port->downloadLine(":00000001FF\n"))
+    {
+        cout << "Error: Failed to download line " << hexFile.currentLine() << endl;
+        return 1;
     }
+
+    if (verbose)
+        cout << "...done" << endl;
 
     port->close();
 }
 
 static void SilentMsgHandler(QtMsgType, const char *)
 {
-}
-
-bool waitFor(C45BSerialPort* port, char c, QString s)
-{
-    char got = 0;
-    if (!port->getChar(&got))
-    {
-        cout << "Error: Timeout waiting for " << qPrintable(s) << endl;
-        return false;
-    }
-    if (got != c)
-    {
-        cout << "Error: Expected " << qPrintable(s) << ", got " << static_cast<int>(got) << endl;
-        return false;
-    }
-    return true;
 }

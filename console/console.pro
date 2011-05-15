@@ -1,4 +1,4 @@
-# Copyright 2010 Torsten Martinsen <bullestock@bullestock.net>
+# Copyright 2011 Torsten Martinsen <bullestock@bullestock.net>
 
 # This file is part of c45b.
 
@@ -17,6 +17,8 @@
 
 INCLUDEPATH += ../qserialport/include ../common
 LIBS += -lQtSerialPort -lkdecore -L ../qserialport/lib
+
+TARGET = c45b
 
 HEADERS       = 
 SOURCES       = main.cpp \
