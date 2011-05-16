@@ -23,5 +23,9 @@ Otherwise, simply do
 
 For help, run c45b --help.
 
+Typical use:
+
+           c45b -f -p /dev/ttyUSB0 hexfile.hex
+
 Torsten Martinsen <torsten@bullestock.net>
 May 2011
