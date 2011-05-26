@@ -1,0 +1,62 @@
+NEWS
+- 20110511 rsz Published v0.0.0
+
+FEATURES
+- Pretty printing of parsed inputs for debugging.
+- Auto usage message creation in three layouts (aligned, interleaved or staggered).
+- Single header file implementation.
+- Dependent only on STL.
+- Arbitrary short and long option names (dash or plus prefixes not required).
+- Arbitrary argument list delimiters.
+- Multiple flag instances allowed.
+- Validation of required options and number of expected arguments per flag.
+- Multiple file import with comments.
+- Exports to file, either set options or all options including defaults when available. 
+- LGPL license.
+- Minimal learning curve due to many examples.
+
+INSTALLATION
+- Copy ezOptionParser.hpp to your project directory, include it into your source code and remember to use the "ez" namespace. Short exmaple:
+
+///////////////////////////////////////////////////////////////////////////
+#include <stdio.h>
+#include "ezOptionParser.hpp"
+
+int main(int argc, const char * argv[]) {
+	ez::ezOptionParser opt;
+
+	opt.overview = "Demo of pretty printing everything parsed for debugging.";
+	opt.syntax = "pretty [OPTIONS]";
+	opt.example = "pretty foo bar --print -fake --dummy -list 1:2:4:8:16 in1 in2 in3 out\n";
+
+	opt.add(
+		"", // Default.
+		0, // Required?
+		0, // Number of args expected.
+		0, // Delimiter if expecting multiple args.
+		"Print all inputs and their category.", // Help description.
+		"-p",     // Flag token. 
+		"-prn",   // Flag token.
+		"--print" // Flag token.
+	);
+
+	opt.parse(argc, argv);
+
+	if (opt.isSet("-p")) {
+		std::string pretty;
+		opt.prettyPrint(pretty);
+		std::cout << pretty;
+	}
+
+	return 0;
+}
+///////////////////////////////////////////////////////////////////////////
+
+TESTING
+- cd examples; make; # Edit Makefile for your compiler environment.
+
+DEVELOPER NOTES
+- For publishing, do "make html; make clean; make dist VER=0.0.0"
+	scp html/* ezOptionParser.hpp rsz@web.sourceforge.net://home/project-web/ezoptionparser/htdocs
+	ssh -t rsz,ezoptionparser@shell.sourceforge.net create # Log on to manage webpage.
+	cd /home/project-web/ezoptionparser/htdocs

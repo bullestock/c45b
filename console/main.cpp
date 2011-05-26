@@ -26,8 +26,7 @@
 #include <QThread>
 #include <QTime>
 
-#include <kaboutdata.h>
-#include <kcmdlineargs.h>
+#include <ezOptionParser.hpp>
 
 #include "hexfile.h"
 #include "serport.h"
@@ -41,7 +40,20 @@ static void SilentMsgHandler(QtMsgType, const char *);
 static const char* version = "0.1";
 
 
-int main(int argc, char *argv[])
+void Usage(ez::ezOptionParser& opt)
+{
+    string usage;
+    opt.getUsage(usage, 80, ez::ezOptionParser::ALIGN);
+    cout << usage;
+};
+
+ostream& operator<<(ostream& os, const QString& s)
+{
+    os << s.toLatin1().data();
+    return os;
+}
+
+int main(int argc, char** argv)
 {
     // How many ms to wait for bootloader prompt
     const int InitialTimeOut = 60000;
@@ -51,55 +63,78 @@ int main(int argc, char *argv[])
     
     QCoreApplication app(argc, argv);
 
-    QTextStream cout(stdout, QIODevice::WriteOnly);
+    ez::ezOptionParser opt;
 
-    KAboutData about("c45b", "", ki18n("c45b"), version, 
-                     ki18n("Tool for communicating with the Chip45 bootloader"),
-                     KAboutData::License_GPL_V3,
-                     ki18n("Copyright 2011 Torsten Martinsen"),
-                     ki18n(""),
-                     "http://bullestock.net",
-                     "torsten@bullestock.net");
-    about.addAuthor(ki18n("Torsten Martinsen"));
-    KCmdLineArgs::init(argc, argv, &about);
+    opt.overview = "Tool for communicating with the Chip45 bootloader";
+    opt.syntax = "c45b [OPTIONS] hexfile";
+    opt.example = "c45b -f -p /dev/ttyUSB0 avrblink.hex\n";
 
-    KCmdLineOptions options;
-    options.add("p <port>", ki18n("Serial port"));
-    options.add("f", ki18n("Program flash memory"));
-    options.add("e", ki18n("Program EEPROM"));
-    options.add("d", ki18n("Show debug info"));
-    options.add("verbose", ki18n("Verbose"));
-    options.add("help", ki18n("Help"));
-    options.add("+file", ki18n("Name of the hex file"));
+    opt.add("", false, 0, 0, "Show version", "-v");
+    opt.add("", true, 1, 0, "Serial port", "-p");
+    opt.add("", false, 0, 0, "Program flash memory", "-f");
+    opt.add("", false, 0, 0, "Program EEPROM", "-e");
+    opt.add("", false, 0, 0, "Show debug info", "-d");
+    opt.add("", false, 0, 0, "Be verbose", "--verbose");
+    opt.add("", false, 0, 0, "Show help", "-h", "--help");
 
-    KCmdLineArgs::addCmdLineOptions(options);
+    opt.parse(argc, const_cast<const char**>(argv));
 
-    KCmdLineArgs* args = KCmdLineArgs::parsedArgs();
-    const bool doFlash = args->isSet("f");
-    const bool doEeprom = args->isSet("e");
+    if (opt.isSet("-h"))
+    {
+        Usage(opt);
+        return 0;
+    }
+
+    if (opt.isSet("-v"))
+    {
+        cout << "c45b version " << version << endl
+             << "Copyright 2011 Torsten Martinsen (http://bullestock.net)"
+             << endl;
+        return 1;
+    }
+
+    const bool doFlash = opt.isSet("-f");
+    const bool doEeprom = opt.isSet("-e");
     if (!doFlash && !doEeprom)
     {
         cout << "Neither -f nor -e specified - nothing to do" << endl;
         return 1;
     }
-    if (args->count() < 1)
+    if (opt.lastArgs.size() < 1)
     {
         cout << "No filename specified" << endl;
         return 1;
     }
+    vector<string> badOptions;
+    if (!opt.gotRequired(badOptions))
+    {
+        for (size_t i = 0; i < badOptions.size(); ++i)
+            cout << "ERROR: Missing required option " << badOptions[i] << ".\n\n";
+        Usage(opt);
+        return 1;
+    }
+    if (!opt.gotExpected(badOptions))
+    {
+        for (size_t i = 0; i < badOptions.size(); ++i)
+            cout << "ERROR: Got unexpected number of arguments for option " << badOptions[i] << ".\n\n";
+        Usage(opt);
+        return 1;
+    }
 
-    bool debug = args->isSet("d");
-    bool verbose = debug || args->isSet("verbose");
+    bool debug = opt.isSet("-d");
+    bool verbose = debug || opt.isSet("-verbose");
 
-    QString fileName(args->arg(0));
+    QString fileName(opt.lastArgs[0]->c_str());
     HexFile hexFile(fileName, verbose);
     if (!hexFile.load())
     {
         cout << "Failed to load file '" << fileName << "': " << hexFile.errorString() << endl;
         return 1;
     }
-    
-    QString device = args->getOption("p");
+
+    string s;
+    opt.get("-p")->getString(s);
+    QString device = s.c_str();
 
     C45BSerialPort* port = new C45BSerialPort(device, verbose);
     if (!port->init())
@@ -180,9 +215,9 @@ int main(int argc, char *argv[])
     if (verbose)
         cout << "Programming " << (doFlash ? "flash" : "EEPROM") << " memory..." << flush;
 
-    QString s;
-    while (hexFile.getLine(s))
-        if (!port->downloadLine(s))
+    QString line;
+    while (hexFile.getLine(line))
+        if (!port->downloadLine(line))
         {
             cout << "Error: Failed to download line " << hexFile.currentLine() << endl;
             return 1;
@@ -190,7 +225,7 @@ int main(int argc, char *argv[])
 
     if (!port->downloadLine(":00000001FF\n"))
     {
-        cout << "Error: Failed to download line " << hexFile.currentLine() << endl;
+        cout << "Error: Failed to complete download" << endl;
         return 1;
     }
 
