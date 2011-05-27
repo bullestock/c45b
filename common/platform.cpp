@@ -15,27 +15,19 @@
 // You should have received a copy of the GNU General Public License
 // along with c45b.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QtSerialPort/qserialport.h>
+#include "platform.h"
 
-class C45BSerialPort : public TNX::QSerialPort
+#ifdef _WIN32
+#  include <windows.h>
+#else
+#  include <unistd.h>
+#endif
+
+void Msleep(int ms)
 {
-public:
-    C45BSerialPort(QString device,
-                   bool verbose);
-
-    ~C45BSerialPort();
-
-    /// 0: Use default
-    bool init(int baudRate = 0);
-
-    /// Read until a character equal to c has been read, or until maxSize characters have been read.
-    /// The c character is not included in the returned data.
-    QByteArray readUntil(char c, qint64 maxSize);
-
-    bool downloadLine(QString s);
-
-private:
-    bool m_verbose;
-};
-
-    
+#ifdef _WIN32
+    Sleep(ms);
+#else
+    usleep(1000*ms);
+#endif
+}

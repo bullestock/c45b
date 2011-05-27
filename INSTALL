@@ -1,0 +1,44 @@
+Installing on Linux and other POSIX systems
+===========================================
+
+Prerequisites:
+
+        - The Qt library, version 4.x.x
+        - A C++ compiler
+        - The source code; either unpack the source .tar.gz or do
+          git clone git://github.com/bullestock/c45b.git
+
+Compilation:
+
+        
+        cd c45b
+        qmake-qt4
+        make
+
+Installation:
+
+On Debian-based systems (including Ubuntu), I recommend
+installing using
+
+           sudo checkinstall --fstrans=no
+
+Otherwise, simply do
+
+           sudo install
+
+
+
+Installing on Windows
+=====================
+
+Prerequisites:
+
+        - The Qt library, version 4.x.x
+        - A C++ compiler
+        - The source code; either unpack the source ZIP file or do
+          git clone git://github.com/bullestock/c45b.git
+
+Compilation:
+
+        qmake
+        nmake (for Visual C++; for MinGW use 'make')

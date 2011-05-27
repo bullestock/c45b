@@ -29,6 +29,7 @@
 #include <ezOptionParser.hpp>
 
 #include "hexfile.h"
+#include "platform.h"
 #include "serport.h"
 
 using namespace std;
@@ -37,7 +38,7 @@ using namespace std;
 static void SilentMsgHandler(QtMsgType, const char *);
 
 
-static const char* version = "0.1";
+static const char* version = "0.2";
 
 
 void Usage(ez::ezOptionParser& opt)
@@ -70,7 +71,8 @@ int main(int argc, char** argv)
     opt.example = "c45b -f -p /dev/ttyUSB0 avrblink.hex\n";
 
     opt.add("", false, 0, 0, "Show version", "-v");
-    opt.add("", true, 1, 0, "Serial port", "-p");
+    opt.add("", true,  1, 0, "Serial port", "-p");
+    opt.add("", false, 1, 0, "Baud rate", "-b");
     opt.add("", false, 0, 0, "Program flash memory", "-f");
     opt.add("", false, 0, 0, "Program EEPROM", "-e");
     opt.add("", false, 0, 0, "Show debug info", "-d");
@@ -137,7 +139,9 @@ int main(int argc, char** argv)
     QString device = s.c_str();
 
     C45BSerialPort* port = new C45BSerialPort(device, verbose);
-    if (!port->init())
+    int baudRate = 0;
+    opt.get("-b")->getInt(baudRate);
+    if (!port->init(baudRate))
     {
         cout << "Error: Cannot open port '" << device << "': " << strerror(errno) << endl;
         return 1;
@@ -161,7 +165,7 @@ int main(int argc, char** argv)
         port->putChar('U');
         port->flushOutBuffer();
 
-        usleep(100000);
+        Msleep(100);
         if (verbose && (t.elapsed() > 1000))
         {
             cout << "." << flush;
@@ -190,10 +194,10 @@ int main(int argc, char** argv)
 
     // Flush
     port->readAll();
-    usleep(100000);
+    Msleep(10);
 
     port->putChar('\n');
-    usleep(100000);
+    Msleep(100);
     port->readAll();
 
     QString cmd(doFlash ? "pf" : "pe");

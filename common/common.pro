@@ -15,19 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with c45b.  If not, see <http://www.gnu.org/licenses/>.
 
-INCLUDEPATH += ../qserialport/include ../common ../ezOptionParser-0.0.0
-LIBS += -L ../qserialport/lib -lQtSerialPort -L ../common -lcommon
+TEMPLATE = lib
 
-TARGET = c45b
+TARGET = common
+CONFIG += staticlib
 
-CONFIG += no_lflags_merge
+INCLUDEPATH += ../qserialport/include
 
-win32: c45b.path = "$$(PROGRAMFILES_HOME)"
-
-!win32: c45b.path = /usr/bin
-c45b.files = c45b
-INSTALLS += c45b
-
-
-HEADERS       = 
-SOURCES       = main.cpp
+HEADERS       = hexfile.h platform.h serport.h
+SOURCES       = hexfile.cpp platform.cpp serport.cpp

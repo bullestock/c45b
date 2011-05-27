@@ -18,6 +18,7 @@
 #include <iostream>
 #include <iomanip>
 
+#include "platform.h"
 #include "serport.h"
 
 using namespace std;
@@ -33,13 +34,25 @@ C45BSerialPort::~C45BSerialPort()
 {
 }
 
-bool C45BSerialPort::init()
+bool C45BSerialPort::init(int baudRate)
 {
-    return setBaudRate(TNX::QPortSettings::BAUDR_19200) &&
-        setFlowControl(TNX::QPortSettings::FLOW_XONXOFF) &&
-        setParity(TNX::QPortSettings::PAR_NONE) &&
-        setDataBits(TNX::QPortSettings::DB_8) &&
-        setStopBits(TNX::QPortSettings::STOP_2) &&
+    // To set the baud rate from an integer, use QPortSettings::set(QString).
+    // We must do this first, since it resets all settings first.
+    TNX::QPortSettings settings;
+    if (baudRate <= 0)
+        baudRate = 19200;
+    if (!settings.set(QString("%1").arg(baudRate)))
+    {
+        cout << "Cannot set baud rate to " << baudRate << endl;
+        return false;
+    }
+    // Set the other settings...
+    settings.setFlowControl(TNX::QPortSettings::FLOW_XONXOFF);
+    settings.setParity(TNX::QPortSettings::PAR_NONE);
+    settings.setDataBits(TNX::QPortSettings::DB_8);
+    settings.setStopBits(TNX::QPortSettings::STOP_2);
+    // ...then apply them to the port, and open it.
+    return setPortSettings(settings) &&
         setCommTimeouts(CtScheme_TimedRead, 100) &&
         open(QIODevice::ReadWrite);       
 }
@@ -69,7 +82,7 @@ bool C45BSerialPort::downloadLine(QString s)
     write(s.toAscii());
 	
 	// read until XON, 10 characters or timeout
-    usleep(8000);
+    Msleep(8);
     QByteArray r = readUntil(17, 10);
     //cout << "REPLY " << QString(r).toLatin1().data() << endl;
     // The bootloader replies with '.' on success...

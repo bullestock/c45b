@@ -40,7 +40,7 @@ Compare strings for opts, so short opt flags come before long format flags.
 For example, -d < --dimension < --dmn, and also lower come before upper. The default STL std::string compare doesn't do that.
 */
 bool CmpOptStringPtr(std::string * s1, std::string * s2) { 
-  int c1,c2;
+  size_t c1,c2;
 	const char *s=s1->c_str();
 	for(c1=0; c1 < s1->size(); ++c1)
 		if (isalpha(s[c1])) // locale sensitive.
@@ -127,61 +127,61 @@ void SplitDelim( const std::string& s, const char token, std::list<std::string*>
 };
 /* ################################################################### */
 void StringsToInts(std::vector<std::string> & strings, std::vector<int> & out) {
-  for(int i=0; i < strings.size(); ++i) {
+  for(size_t i=0; i < strings.size(); ++i) {
     out.push_back(atoi(strings[i].c_str()));
   }
 };
 /* ################################################################### */
 void StringsToInts(std::vector<std::string*> * strings, std::vector<int> * out) {
-  for(int i=0; i < strings->size(); ++i) {
+  for(size_t i=0; i < strings->size(); ++i) {
     out->push_back(atoi(strings->at(i)->c_str()));
   }
 };
 /* ################################################################### */
 void StringsToLongs(std::vector<std::string> & strings, std::vector<long> & out) {
-  for(int i=0; i < strings.size(); ++i) {
+  for(size_t i=0; i < strings.size(); ++i) {
     out.push_back(atol(strings[i].c_str()));
   }
 };
 /* ################################################################### */
 void StringsToLongs(std::vector<std::string*> * strings, std::vector<long> * out) {
-  for(int i=0; i < strings->size(); ++i) {
+  for(size_t i=0; i < strings->size(); ++i) {
     out->push_back(atol(strings->at(i)->c_str()));
   }
 };
 /* ################################################################### */
 void StringsToULongs(std::vector<std::string> & strings, std::vector<unsigned long> & out) {
-  for(int i=0; i < strings.size(); ++i) {
+  for(size_t i=0; i < strings.size(); ++i) {
     out.push_back(strtoul(strings[i].c_str(),0,0));
   }
 };
 /* ################################################################### */
 void StringsToULongs(std::vector<std::string*> * strings, std::vector<unsigned long> * out) {
-  for(int i=0; i < strings->size(); ++i) {
+  for(size_t i=0; i < strings->size(); ++i) {
     out->push_back(strtoul(strings->at(i)->c_str(),0,0));
   }
 };
 /* ################################################################### */
 void StringsToFloats(std::vector<std::string> & strings, std::vector<float> & out) {
-  for(int i=0; i < strings.size(); ++i) {
+  for(size_t i=0; i < strings.size(); ++i) {
     out.push_back(atof(strings[i].c_str()));
   }
 };
 /* ################################################################### */
 void StringsToFloats(std::vector<std::string*> * strings, std::vector<float> * out) {
-  for(int i=0; i < strings->size(); ++i) {
+  for(size_t i=0; i < strings->size(); ++i) {
     out->push_back(atof(strings->at(i)->c_str()));
   }
 };
 /* ################################################################### */
 void StringsToDoubles(std::vector<std::string> & strings, std::vector<double> & out) {
-  for(int i=0; i < strings.size(); ++i) {
+  for(size_t i=0; i < strings.size(); ++i) {
     out.push_back(atof(strings[i].c_str()));
   }
 };
 /* ################################################################### */
 void StringsToDoubles(std::vector<std::string*> * strings, std::vector<double> * out) {
-  for(int i=0; i < strings->size(); ++i) {
+  for(size_t i=0; i < strings->size(); ++i) {
     out->push_back(atof(strings->at(i)->c_str()));
   }
 };
@@ -272,8 +272,7 @@ public:
   OptionGroup() : delim(0), expectArgs(0), isSet(false), isRequired(false) { }
 
   ~OptionGroup() {
-    int i, j;
-    for(i=0; i < flags.size(); ++i)
+    for(size_t i=0; i < flags.size(); ++i)
       delete flags[i];
       
     flags.clear();
@@ -319,9 +318,8 @@ public:
 };
 /* ################################################################### */
 void OptionGroup::clearArgs() {
-	int i,j;
-	for(i=0; i < args.size(); ++i) {
-		for(j=0; j < args[i]->size(); ++j)
+	for(size_t i=0; i < args.size(); ++i) {
+		for(size_t j=0; j < args[i]->size(); ++j)
 			delete args[i]->at(j);
 			
 		delete args[i];
@@ -493,9 +491,9 @@ void OptionGroup::getMultiInts(std::vector< std::vector<int> >& out) {
     }
   } else {
     if (!args.empty()) {
-      int n = args.size();
+      size_t n = args.size();
       if (out.size() < n) out.resize(n);
-      for(int i=0; i < n; ++i) {
+      for(size_t i=0; i < n; ++i) {
         StringsToInts(args[i], &out[i]);
       }
     }
@@ -512,9 +510,9 @@ void OptionGroup::getMultiLongs(std::vector< std::vector<long> >& out) {
     }
   } else {
     if (!args.empty()) {
-      int n = args.size();
+      size_t n = args.size();
       if (out.size() < n) out.resize(n);
-      for(int i=0; i < n; ++i) {
+      for(size_t i=0; i < n; ++i) {
         StringsToLongs(args[i], &out[i]);
       }
     }
@@ -531,9 +529,9 @@ void OptionGroup::getMultiULongs(std::vector< std::vector<unsigned long> >& out)
     }
   } else {
     if (!args.empty()) {
-      int n = args.size();
+      size_t n = args.size();
       if (out.size() < n) out.resize(n);
-      for(int i=0; i < n; ++i) {
+      for(size_t i=0; i < n; ++i) {
         StringsToULongs(args[i], &out[i]);
       }
     }
@@ -550,9 +548,9 @@ void OptionGroup::getMultiFloats(std::vector< std::vector<float> >& out) {
     }
   } else {
     if (!args.empty()) {
-      int n = args.size();
+      size_t n = args.size();
       if (out.size() < n) out.resize(n);
-      for(int i=0; i < n; ++i) {
+      for(size_t i=0; i < n; ++i) {
         StringsToFloats(args[i], &out[i]);
       }
     }
@@ -569,9 +567,9 @@ void OptionGroup::getMultiDoubles(std::vector< std::vector<double> >& out) {
     }
   } else {
     if (!args.empty()) {
-      int n = args.size();
+      size_t n = args.size();
       if (out.size() < n) out.resize(n);
-      for(int i=0; i < n; ++i) {
+      for(size_t i=0; i < n; ++i) {
         StringsToDoubles(args[i], &out[i]);
       }
     }
@@ -588,12 +586,12 @@ void OptionGroup::getMultiStrings(std::vector< std::vector<std::string> >& out) 
     }
   } else {
     if (!args.empty()) {
-      int n = args.size();
+      size_t n = args.size();
       if (out.size() < n) out.resize(n);
 
-      for(int i=0; i < n; ++i) {
-				for(int j=0; j < args[i]->size(); ++j) 
-					out[i].push_back( *args[i]->at(j) );
+      for(size_t i=0; i < n; ++i) {
+          for(size_t j=0; j < args[i]->size(); ++j) 
+              out[i].push_back( *args[i]->at(j) );
       }
     }
   }
@@ -651,7 +649,7 @@ ezOptionParser::~ezOptionParser() {
 }
 /* ################################################################### */
 void ezOptionParser::reset() {
-	int i;
+	size_t i;
 	for(i=0; i < groups.size(); ++i)
 		delete groups[i];
 	groups.clear();
@@ -672,7 +670,7 @@ void ezOptionParser::reset() {
 };
 /* ################################################################### */
 void ezOptionParser::resetArgs() {
-	int i;
+	size_t i;
 	for(i=0; i < groups.size(); ++i)
 		groups[i]->clearArgs();
 	
@@ -772,7 +770,7 @@ void ezOptionParser::add(const char * defaults, bool required, int expectArgs, c
 };
 /* ################################################################### */
 bool ezOptionParser::exportFile(const char * filename, bool all) {
-	int i;
+	size_t i;
 	std::string out;
 	bool quote;
 	
@@ -1035,7 +1033,7 @@ void ezOptionParser::getUsage(std::string & usage, int width, Layout layout) {
 // Creates 2 column formatted help descriptions for each option flag.
 void ezOptionParser::getUsageDescriptions(std::string & usage, int width, Layout layout) {
 	// Sort each flag list amongst each group.
-	int i;
+	size_t i;
 	// Store index of flag groups before sort for easy lookup later.
 	std::map<std::string*, int> stringPtrToIndexMap;
 	std::vector<std::string* > stringPtrs(groups.size());
@@ -1173,9 +1171,7 @@ void ezOptionParser::getUsageDescriptions(std::string & usage, int width, Layout
 };
 /* ################################################################### */
 bool ezOptionParser::gotExpected(std::vector<std::string> & badOptions) {
-  int i,j;
-  
-  for(i=0; i < groups.size(); ++i) {
+  for(size_t i=0; i < groups.size(); ++i) {
 		OptionGroup *g = groups[i];
     // If was set, ensure number of args is correct.
     if (g->isSet) {
@@ -1184,20 +1180,18 @@ bool ezOptionParser::gotExpected(std::vector<std::string> & badOptions) {
         continue;
       }
       
-      for(j=0; j < g->args.size(); ++j) {
+      for(size_t j=0; j < g->args.size(); ++j) {
         if ((g->expectArgs != -1) && (g->expectArgs != g->args[j]->size()))
           badOptions.push_back(*g->flags[0]);
       }
-		}
+    }
   }
 
   return badOptions.empty();
 };
 /* ################################################################### */
 bool ezOptionParser::gotRequired(std::vector<std::string> & badOptions) {
-  int i;
-  
-  for(i=0; i < groups.size(); ++i) {
+  for(size_t i=0; i < groups.size(); ++i) {
 		OptionGroup *g = groups[i];
     // Simple case when required but user never set it.
     if (g->isRequired && (!g->isSet)) {
@@ -1218,7 +1212,8 @@ void ezOptionParser::parse(int argc, const char * argv[]) {
 		std::cout << (*it).first << " => " << (*it).second << std::endl;
 	*/
 	
-	int found=0, i, k, firstOptIndex=0, lastOptIndex=0;
+	int k, firstOptIndex=0, lastOptIndex=0;
+    size_t i;
 	std::string s;
 	OptionGroup *g;
 	
