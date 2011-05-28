@@ -22,5 +22,5 @@ CONFIG += staticlib
 
 INCLUDEPATH += ../qserialport/include
 
-HEADERS       = hexfile.h platform.h serport.h
-SOURCES       = hexfile.cpp platform.cpp serport.cpp
+HEADERS       = c45butils.h hexfile.h platform.h serport.h
+SOURCES       = c45butils.cpp hexfile.cpp platform.cpp serport.cpp

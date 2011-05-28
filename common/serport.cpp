@@ -18,6 +18,7 @@
 #include <iostream>
 #include <iomanip>
 
+#include "c45butils.h"
 #include "platform.h"
 #include "serport.h"
 
@@ -87,7 +88,16 @@ bool C45BSerialPort::downloadLine(QString s)
     //cout << "REPLY " << QString(r).toLatin1().data() << endl;
     // The bootloader replies with '.' on success...
     if (!r.contains('.') && !r.contains('*'))
+    {
+        if (m_verbose)
+        {
+            if (r.isEmpty())
+                cout << "Timeout" << endl;
+            else
+                cout << "Reply: " << FormatControlChars(r).toStdString() << endl;
+        }
         return false;
+    }
     // ...and with '*' on page write
     if (m_verbose && r.contains('*'))
         cout << "+" << flush;

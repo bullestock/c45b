@@ -28,6 +28,7 @@
 
 #include <ezOptionParser.hpp>
 
+#include "c45butils.h"
 #include "hexfile.h"
 #include "platform.h"
 #include "serport.h"
@@ -124,7 +125,7 @@ int main(int argc, char** argv)
     }
 
     bool debug = opt.isSet("-d");
-    bool verbose = debug || opt.isSet("-verbose");
+    bool verbose = debug || opt.isSet("--verbose");
 
     QString fileName(opt.lastArgs[0]->c_str());
     HexFile hexFile(fileName, verbose);
@@ -205,19 +206,21 @@ int main(int argc, char** argv)
     port->putChar('\n');
     // Wait for "pf+\r"
     QString reply = port->readUntil('\r', 10);
-    reply = reply.trimmed();
+    reply = reply.replace(QChar(0x13), "").trimmed();
     QString expected = cmd + QString("+");
     if (!reply.startsWith(expected))
     {
         cout << "Error: Bootloader did not respond to '" << (doFlash ? "pf" : "pe") << "' command" << endl;
         if (verbose)
-            cout << "Reply: " << reply << endl;
+            cout << "Reply: " << FormatControlChars(reply) << endl;
         return 1;
     }
 
     // Send to bootloader
     if (verbose)
         cout << "Programming " << (doFlash ? "flash" : "EEPROM") << " memory..." << flush;
+
+    port->readAll();
 
     QString line;
     while (hexFile.getLine(line))
