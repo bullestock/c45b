@@ -16,7 +16,7 @@
 # along with c45b.  If not, see <http://www.gnu.org/licenses/>.
 
 INCLUDEPATH += ../qserialport/include ../common ../ezOptionParser-0.0.0
-LIBS += -L ../qserialport/lib -lQtSerialPort -L ../common -lcommon
+LIBS += -L../qserialport/lib -lQtSerialPort
 
 TARGET = c45b
 
@@ -28,6 +28,12 @@ win32: c45b.path = "$$(PROGRAMFILES_HOME)"
 c45b.files = c45b
 INSTALLS += c45b
 
-
-HEADERS       = 
-SOURCES       = main.cpp
+HEADERS       = ../common/c45butils.h \
+		../common/hexfile.h \
+       		../common/platform.h \
+       		../common/serport.h
+SOURCES       = ../common/c45butils.cpp \
+		../common/hexfile.cpp \
+		../common/platform.cpp \
+		../common/serport.cpp \
+		main.cpp
