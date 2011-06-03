@@ -20,7 +20,7 @@ LIBS += -L../qserialport/lib -lQtSerialPort
 
 TARGET = c45b
 
-CONFIG += no_lflags_merge
+CONFIG += console no_lflags_merge
 
 win32: c45b.path = "$$(PROGRAMFILES_HOME)"
 

@@ -1070,7 +1070,7 @@ void ezOptionParser::getUsageDescriptions(std::string & usage, int width, Layout
 				opts.append("1[");
 				opts.append(1, groups[k]->delim);
 				opts.append("ARGn]");
-      }
+            }
 		}
 			
 		sortedOpts.push_back(opts);
@@ -1137,6 +1137,8 @@ void ezOptionParser::getUsageDescriptions(std::string & usage, int width, Layout
         else
           delete rem;
       }
+      if (insertionIter == desc.end())
+          break;
     }
 
     usage.append(sortedOpts[i]);
