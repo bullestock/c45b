@@ -153,8 +153,13 @@ int main(int argc, char** argv)
 
     QTime t;
     t.start();
-    while (!port->bytesAvailable() && (t.elapsed() < InitialTimeOut))
+    QTime t2;
+    t2.start();
+    int avail = 0;
+    while (!avail && (t.elapsed() < InitialTimeOut))
     {
+        avail = port->bytesAvailable();
+        
         // "After a reset the bootloader waits for approximately 2 seconds to detect a
         //  transmission at its RXD pin. If so, it will measure the timing of the rising
         //  and falling edges of four consecutive characters 'U' at the host's baud to
@@ -167,16 +172,16 @@ int main(int argc, char** argv)
         port->flushOutBuffer();
 
         Msleep(100);
-        if (verbose && (t.elapsed() > 1000))
+        if (verbose && (t2.elapsed() > 1000))
         {
             cout << "." << flush;
-            t.start();
+            t2.start();
         }
     }
     QString prompt = port->readUntil('>', 20);
 
     if (debug)
-        cout << "Read: " << prompt << endl;
+        cout << "Read " << prompt.size() << " bytes: " << FormatControlChars(prompt).toStdString() << endl;
     if (verbose)
         cout << "\rConnected                                                                      " << endl;
     

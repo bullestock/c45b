@@ -17,16 +17,16 @@
 
 #include "c45butils.h"
 
- QString FormatControlChars(QString s)
- {
-     QString r;
-     for (int i = 0; i < s.size(); ++i)
-     {
-         QChar c = s[i];
-         if (c.isPrint())
-             r += c;
-         else
-             r += QString("<%1>").arg(c.toAscii(), 2, 16, QChar(' '));
-     }
-     return r;
- }
+QString FormatControlChars(QString s)
+{
+    QString r;
+    for (int i = 0; i < s.size(); ++i)
+    {
+        QChar c = s[i];
+        if (c.isPrint())
+            r += c;
+        else
+            r += QString("<%1>").arg(c.toAscii(), 2, 16, QChar('0'));
+    }
+    return r;
+}
