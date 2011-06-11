@@ -5,11 +5,10 @@ Prerequisites:
 
         - The Qt library, version 4.x.x
         - A C++ compiler
-        - The source code; either unpack the source .tar.gz or do
-          git clone git://github.com/bullestock/c45b.git
 
 Compilation:
 
+        Unpack the source .tar.gz, or do "git clone git://github.com/bullestock/c45b.git"
         
         cd c45b
         qmake-qt4
@@ -33,12 +32,25 @@ Installing on Windows
 
 Prerequisites:
 
-        - The Qt library, version 4.x.x
-        - A C++ compiler
-        - The source code; either unpack the source ZIP file or do
-          git clone git://github.com/bullestock/c45b.git
+        - Install the Qt SDK from http://qt.nokia.com/downloads/sdk-windows-cpp
 
 Compilation:
 
-        qmake
-        nmake (for Visual C++; for MinGW use 'make')
+        - Unpack the source ZIP file, or do "git clone git://github.com/bullestock/c45b.git"
+
+        - Open a command prompt, go to the place where you unpacked the source,
+          and type the following commands:
+
+          PATH=%PATH%;c:\QtSDK\mingw\bin;c:\QtSDK\Desktop\Qt\4.7.3\mingw\bin
+          set QMAKESPEC=win32-g++
+          qmake
+          mingw32-make release
+
+        - Then, copy the following files:
+
+          console\release\c45b.exe
+          qserialport\lib\QSerialPort1.dll
+          c:\QtSDK\Desktop\Qt\4.7.3\mingw\lib\QtCore4.dll
+          c:\QtSDK\mingw\bin\libgcc_s_dw2-1.dll
+
+          to the folder where you want to install c45b. Add the folder to your PATH.

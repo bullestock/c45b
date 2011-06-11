@@ -39,7 +39,7 @@ using namespace std;
 static void SilentMsgHandler(QtMsgType, const char *);
 
 
-static const char* version = "0.2";
+static const char* version = "0.3";
 
 
 void Usage(ez::ezOptionParser& opt)
@@ -69,10 +69,18 @@ int main(int argc, char** argv)
 
     opt.overview = "Tool for communicating with the Chip45 bootloader";
     opt.syntax = "c45b [OPTIONS] hexfile";
+#ifdef WIN32
+    opt.example = "c45b -f -p COM3 avrblink.hex\n";
+#else
     opt.example = "c45b -f -p /dev/ttyUSB0 avrblink.hex\n";
+#endif
 
     opt.add("", false, 0, 0, "Show version", "-v");
-    opt.add("", true,  1, 0, "Serial port", "-p");
+    opt.add("", true,  1, 0, "Serial port"
+#ifdef WIN32
+            " (without colon)"
+#endif
+            , "-p");
     opt.add("", false, 1, 0, "Baud rate", "-b");
     opt.add("", false, 0, 0, "Program flash memory", "-f");
     opt.add("", false, 0, 0, "Program EEPROM", "-e");

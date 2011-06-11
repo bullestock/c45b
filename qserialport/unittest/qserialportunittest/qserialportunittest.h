@@ -19,9 +19,6 @@
  * author labs@inbiza.com
  */
 
-#ifdef WIN32
-# include <guiddef.h>
-#endif
 #include <QSerialPort>
 #include <QtTest/QtTest>
 
