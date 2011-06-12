@@ -114,7 +114,7 @@ unix:!macx {
 
 unix:!lib_bundle: {
   # install
-  QSERPORT_INSTALL_DIR = /usr/local/qserialport
+  QSERPORT_INSTALL_DIR = /usr
   QSERPORT_INSTALL_LIBDIR = $$QSERPORT_INSTALL_DIR/lib
   QSERPORT_INSTALL_INCDIR = $$QSERPORT_INSTALL_DIR/include
 
