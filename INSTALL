@@ -37,20 +37,18 @@ Prerequisites:
 Compilation:
 
         - Unpack the source ZIP file, or do "git clone git://github.com/bullestock/c45b.git"
+        - Start Qt Creator
+        - Click 'Open project...'
+        - Browse to the c45b.pro file and click OK
+        - Press Ctrl-T and select 'Qt 4.7.3 for Desktop - MinGW 4.4 (Qt SDK) Release'
+        - In the Build menu, select 'Build All'
+        - After a while, a single error and some warnings will be shown. 
+          These can be safely ignored.
+        - Finally, copy the following files:
 
-        - Open a command prompt, go to the place where you unpacked the source,
-          and type the following commands:
-
-          PATH=%PATH%;c:\QtSDK\mingw\bin;c:\QtSDK\Desktop\Qt\4.7.3\mingw\bin
-          set QMAKESPEC=win32-g++
-          qmake
-          mingw32-make release
-
-        - Then, copy the following files:
-
-          console\release\c45b.exe
-          qserialport\lib\QSerialPort1.dll
+          ...\c45b-build-desktop\console\release\c45b.exe
+          ...\c45b-build-desktop\qserialport\lib\QSerialPort1.dll
           c:\QtSDK\Desktop\Qt\4.7.3\mingw\lib\QtCore4.dll
           c:\QtSDK\mingw\bin\libgcc_s_dw2-1.dll
 
-          to the folder where you want to install c45b. Add the folder to your PATH.
+          to the folder where you want to install c45b. Add that folder to your PATH.
