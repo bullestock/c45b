@@ -19,7 +19,10 @@ Installation:
 On Debian-based systems (including Ubuntu), I recommend
 installing using
 
-           sudo checkinstall --fstrans=no
+           sudo checkinstall --fstrans=no --pkgname=c45b --pkggroup=Electronics
+
+This approach should also work on RPM-based systems (RedHat and derivatives), 
+as well as Slackware, but I have not tried this.
 
 Otherwise, simply do
 
