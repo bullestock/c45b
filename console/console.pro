@@ -20,6 +20,8 @@ LIBS += -L../qserialport/lib -lQtSerialPort
 
 TARGET = c45b
 
+DEPENDPATH += ../qserialport/lib ../ezOptionParser-0.0.0
+
 CONFIG += console no_lflags_merge
 
 win32: c45b.path = "$$(PROGRAMFILES_HOME)"
@@ -30,10 +32,15 @@ INSTALLS += c45b
 
 HEADERS       = ../common/c45butils.h \
 		../common/hexfile.h \
+		../common/hexfiletester.h \
+		../common/hexutils.h \
        		../common/platform.h \
-       		../common/serport.h
+       		../common/serport.h \
+                ../ezOptionParser-0.0.0/ezOptionParser.hpp
 SOURCES       = ../common/c45butils.cpp \
 		../common/hexfile.cpp \
+		../common/hexfiletester.cpp \
+		../common/hexutils.cpp \
 		../common/platform.cpp \
 		../common/serport.cpp \
 		main.cpp

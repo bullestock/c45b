@@ -11,5 +11,7 @@ Typical use:
 
            c45b -f -p /dev/ttyUSB0 hexfile.hex
 
+Thanks to René Staffen for contributing patches to this project.
+
 Torsten Martinsen <torsten@bullestock.net>
-May 2011
+February 2012

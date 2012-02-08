@@ -25,8 +25,8 @@ VS_VERSION_INFO VERSIONINFO
 				VALUE "FileDescription", "\0"
 				VALUE "FileVersion", "1.0.0.0\0"
 				VALUE "LegalCopyright", "\0"
-				VALUE "OriginalFilename", "QtSerialPort1.dll\0"
-				VALUE "ProductName", "QtSerialPort\0"
+				VALUE "OriginalFilename", "QtSerialPortd1.dll\0"
+				VALUE "ProductName", "QtSerialPortd\0"
 			END
 		END
 	END

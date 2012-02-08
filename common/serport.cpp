@@ -84,9 +84,15 @@ bool C45BSerialPort::downloadLine(QString s)
 	
 	// read until XON, 10 characters or timeout
     Msleep(8);
-    QByteArray r = readUntil(17, 10);
+
+    QByteArray r = readUntil(XON, 10);
     //cout << "REPLY " << QString(r).toLatin1().data() << endl;
     // The bootloader replies with '.' on success...
+    if( r.contains('-') )
+    {
+        cout << "Something went wrong during programming " << endl;
+        return false;
+    }
     if (!r.contains('.') && !r.contains('*'))
     {
         if (m_verbose)

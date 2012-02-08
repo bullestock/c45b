@@ -20,6 +20,9 @@
 class C45BSerialPort : public TNX::QSerialPort
 {
 public:
+    static const char XON  = 0x11;
+    static const char XOFF = 0x13;
+
     C45BSerialPort(QString device,
                    bool verbose);
 
