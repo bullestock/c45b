@@ -19,15 +19,18 @@ Installation:
 On Debian-based systems (including Ubuntu), I recommend
 installing using
 
-           sudo checkinstall --fstrans=no --pkgname=c45b --pkggroup=Electronics
+        sudo checkinstall --fstrans=no --pkgname=c45b --pkggroup=Electronics
 
 This approach should also work on RPM-based systems (RedHat and derivatives), 
 as well as Slackware, but I have not tried this.
 
 Otherwise, simply do
 
-           sudo install
+        sudo install
 
+If you want to install to another directory than the default, use something like
+
+        INSTALL_ROOT=/home/me/bin make install
 
 
 Installing on Windows
