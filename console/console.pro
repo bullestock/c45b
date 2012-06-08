@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with c45b.  If not, see <http://www.gnu.org/licenses/>.
 
+include(../prefix.pri)
+
 INCLUDEPATH += ../qserialport/include ../common ../ezOptionParser-0.0.0
 LIBS += -L../qserialport/lib -lQtSerialPort
 
@@ -24,13 +26,8 @@ DEPENDPATH += ../qserialport/lib ../ezOptionParser-0.0.0
 
 CONFIG += console no_lflags_merge
 
-isEmpty(PREFIX) {
-    PREFIX = /usr/local
-}
+c45b.path = $${EXEC_DIR}                                                                                                                                                                            
 
-win32: c45b.path = "$$(PROGRAMFILES_HOME)"
-
-!win32: c45b.path = $$(PREFIX)/bin
 c45b.files = c45b
 INSTALLS += c45b
 

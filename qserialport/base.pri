@@ -21,6 +21,8 @@
 ## www.inbiza.com
 ##
 
+include(../prefix.pri)
+
 !isEmpty( QMAKESPEC ) {
   MKSPEC = $$replace(QMAKESPEC,-," ")
   MKSPEC = $$join(MKSPEC, " -L", )
