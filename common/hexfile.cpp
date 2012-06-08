@@ -60,7 +60,9 @@ bool HexFile::load(QString fileName, bool verbose)
         unsigned char checkSum = byteCount;  // start checksum computation
         quint32 address = asciiToHex(line[3], line[4]);  // get address high byte
         checkSum += (unsigned char) address;  // checksum...
-        address = (address << 8) + asciiToHex(line[5], line[6]);  // get address low byte
+        address = address << 8;
+        unsigned char low = asciiToHex(line[5], line[6]);  // get address low byte
+        address += low;
         checkSum += (unsigned char) (address & 0xff);  // checksum...
         unsigned char recordType = asciiToHex(line[7], line[8]);  // get record type
         checkSum += recordType;

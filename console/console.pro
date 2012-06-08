@@ -24,9 +24,13 @@ DEPENDPATH += ../qserialport/lib ../ezOptionParser-0.0.0
 
 CONFIG += console no_lflags_merge
 
+isEmpty(PREFIX) {
+    PREFIX = /usr/local
+}
+
 win32: c45b.path = "$$(PROGRAMFILES_HOME)"
 
-!win32: c45b.path = /usr/bin
+!win32: c45b.path = $$(PREFIX)/bin
 c45b.files = c45b
 INSTALLS += c45b
 
