@@ -30,7 +30,7 @@ Otherwise, simply do
 
 If you want to install to another directory than the default, use something like
 
-        INSTALL_ROOT=/home/me/bin make install
+        qmake-qt4 PREFIX=$HOME/software/
 
 
 Installing on Windows
