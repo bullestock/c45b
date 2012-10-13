@@ -1,0 +1,14 @@
+*.swp
+Makefile*
+*.deb
+*.o
+*.out
+console/c45b
+*.so
+*.so.*
+doc-pak/
+qserialport/bin/
+qserialport/build/
+qserialport/lib/
+description-pak
+qserialport/unittest/qserialportunittest/qserialportunittest
