@@ -21,6 +21,7 @@
  * @brief
  */
 
+#include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <errno.h>
