@@ -17,7 +17,7 @@
 
 #include <QtSerialPort/qserialport.h>
 
-class C45BSerialPort : public TNX::QSerialPort
+class C45BSerialPort : public QSerialPort
 {
 public:
     static const char XON  = 0x11;

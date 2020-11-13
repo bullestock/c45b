@@ -3,7 +3,7 @@ Installing on Linux and other POSIX systems
 
 Prerequisites:
 
-        - The Qt library, version 4.x.x
+        - The Qt library, version 5.x, including the QSerialPort component
         - A C++ compiler
 
 Compilation:
@@ -11,7 +11,7 @@ Compilation:
         Unpack the source .tar.gz, or do "git clone git://github.com/bullestock/c45b.git"
         
         cd c45b
-        qmake-qt4
+        qmake
         make
 
 Installation:
@@ -30,31 +30,4 @@ Otherwise, simply do
 
 If you want to install to another directory than the default, use something like
 
-        qmake-qt4 PREFIX=$HOME/software/
-
-
-Installing on Windows
-=====================
-
-Prerequisites:
-
-        - Install the Qt SDK from http://qt.nokia.com/downloads/sdk-windows-cpp
-
-Compilation:
-
-        - Unpack the source ZIP file, or do "git clone git://github.com/bullestock/c45b.git"
-        - Start Qt Creator
-        - Click 'Open project...'
-        - Browse to the c45b.pro file and click OK
-        - Press Ctrl-T and select 'Qt 4.7.3 for Desktop - MinGW 4.4 (Qt SDK) Release'
-        - In the Build menu, select 'Build All'
-        - After a while, a single error and some warnings will be shown. 
-          These can be safely ignored.
-        - Finally, copy the following files:
-
-          ...\c45b-build-desktop\console\release\c45b.exe
-          ...\c45b-build-desktop\qserialport\lib\QSerialPort1.dll
-          c:\QtSDK\Desktop\Qt\4.7.3\mingw\lib\QtCore4.dll
-          c:\QtSDK\mingw\bin\libgcc_s_dw2-1.dll
-
-          to the folder where you want to install c45b. Add that folder to your PATH.
+        qmake PREFIX=$HOME/software/

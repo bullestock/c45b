@@ -1,3 +1,0 @@
-/usr/bin/moc-qt4 -DHAVE_MODULES -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_SHARED -I/usr/share/qt4/mkspecs/linux-g++ -I. -I/usr/include/qt4/QtCore -I/usr/include/qt4 -I. conf4.cpp -o conf4.moc
-g++ -c -pipe -O2 -Wall -W -D_REENTRANT -DHAVE_MODULES -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_SHARED -I/usr/share/qt4/mkspecs/linux-g++ -I. -I/usr/include/qt4/QtCore -I/usr/include/qt4 -I. -o conf4.o conf4.cpp
-g++ -Wl,-O1 -o conf conf4.o    -L/usr/lib -lQtCore -lpthread 

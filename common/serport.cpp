@@ -37,25 +37,12 @@ C45BSerialPort::~C45BSerialPort()
 
 bool C45BSerialPort::init(int baudRate)
 {
-    // To set the baud rate from an integer, use QPortSettings::set(QString).
-    // We must do this first, since it resets all settings first.
-    TNX::QPortSettings settings;
-    if (baudRate <= 0)
-        baudRate = 19200;
-    if (!settings.set(QString("%1").arg(baudRate)))
-    {
-        cout << "Cannot set baud rate to " << baudRate << endl;
-        return false;
-    }
-    // Set the other settings...
-    settings.setFlowControl(TNX::QPortSettings::FLOW_XONXOFF);
-    settings.setParity(TNX::QPortSettings::PAR_NONE);
-    settings.setDataBits(TNX::QPortSettings::DB_8);
-    settings.setStopBits(TNX::QPortSettings::STOP_2);
-    // ...then apply them to the port, and open it.
-    return setPortSettings(settings) &&
-        setCommTimeouts(CtScheme_TimedRead, 100) &&
-        open(QIODevice::ReadWrite);       
+    setBaudRate(baudRate);
+    setFlowControl(QSerialPort::SoftwareControl);
+    setParity(QSerialPort::NoParity);
+    setDataBits(QSerialPort::Data8);
+    setStopBits(QSerialPort::TwoStop);
+    return open(QIODevice::ReadWrite);       
 }
 
 QByteArray C45BSerialPort::readUntil(char terminator, qint64 maxSize)
@@ -64,10 +51,11 @@ QByteArray C45BSerialPort::readUntil(char terminator, qint64 maxSize)
     qint64 bytesRead = 0;
     while (bytesRead < maxSize)
     {
-        unsigned char c = 0;
-        if (!getChar(reinterpret_cast<char*>(&c)))
+        if (!waitForReadyRead(100))
             // Timeout
             break;
+        unsigned char c = 0;
+        getChar(reinterpret_cast<char*>(&c));
         if (c == terminator)
             break;
         data.append(c);
@@ -79,8 +67,8 @@ bool C45BSerialPort::downloadLine(QString s)
 {
 	// Send the hex record
     // if (m_verbose)
-    //     cout << "Sending '" << s.trimmed().toAscii().data() << "'" << endl;
-    write(s.toAscii());
+    //     cout << "Sending '" << s.trimmed().toLatin1().data() << "'" << endl;
+    write(s.toLatin1());
 	
 	// read until XON, 10 characters or timeout
     Msleep(8);
@@ -106,6 +94,6 @@ bool C45BSerialPort::downloadLine(QString s)
     }
     // ...and with '*' on page write
     if (m_verbose && r.contains('*'))
-        cout << "+" << flush;
+        std::cout << "+" << std::flush;
     return true;
 }

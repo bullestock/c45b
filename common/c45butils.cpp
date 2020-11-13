@@ -26,7 +26,7 @@ QString FormatControlChars(QString s)
         if (c.isPrint())
             r += c;
         else
-            r += QString("<%1>").arg(c.toAscii(), 2, 16, QChar('0'));
+            r += QString("<%1>").arg(c.toLatin1(), 2, 16, QChar('0'));
     }
     return r;
 }

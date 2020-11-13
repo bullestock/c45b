@@ -16,4 +16,4 @@
 # along with c45b.  If not, see <http://www.gnu.org/licenses/>.
 
 TEMPLATE = subdirs
-SUBDIRS = qserialport console
+SUBDIRS = console

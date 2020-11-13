@@ -30,7 +30,7 @@ void HexFileTester::test(const QString& filename)
     // test load
     if(!hf.load(filename, true))
     {
-        cout << "Error opening hexfile '" << filename.toAscii().constData() << "': " << hf.errorString().toAscii().constData() << endl;
+        cout << "Error opening hexfile '" << filename.toLatin1().constData() << "': " << hf.errorString().toLatin1().constData() << endl;
         return;
     }
 
